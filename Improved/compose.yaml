@@ -1,0 +1,6 @@
+﻿services:
+  improved:
+    image: improved
+    build:
+      context: .
+      dockerfile: Improved/Dockerfile
