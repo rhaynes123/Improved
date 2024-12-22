@@ -1,13 +1,5 @@
-class Habit{
-    name: string;
-    date: string;
-    
-    constructor(name: string, date: string) {
-        this.name = name;
-        this.date = date;
-    }
-    
-}
+import {Habit} from "./habit";
+import HabitService from "./habitService.js"
 const habitList = document.getElementById("habitList") as HTMLDivElement;
 const formData = document.getElementById("formData") as HTMLDivElement;
 
@@ -36,16 +28,14 @@ const saveHabits = () => {
     habitRows.forEach((habitRow) => {
         let habitName = (habitRow.querySelector("[name='habitName']") as HTMLInputElement).value;
         let date = (habitRow.querySelector("[name='startDate']") as HTMLInputElement).value;
-        newHabits.push(new Habit(habitName, date));
+        let newHabit : Habit = {
+            name : habitName,
+            date : date,
+        };
+        newHabits.push(newHabit);
     })
     
-    fetch("/api/habits/create", {
-        method: "POST",
-        headers: {  
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newHabits)
-    }).then((response) => {
+    HabitService.create(newHabits).then((response) => {
         if (response.ok) {
             showAlert("Habits successfully submitted!", "success");
             return response.json();
@@ -58,3 +48,21 @@ const saveHabits = () => {
     
 }
 saveHabitButton.addEventListener("click", saveHabits);
+
+async function searchForHabit( name : String): Promise<Habit[]>  | null {
+   return await HabitService.findHabit(name)
+}
+const newHabitName = document.getElementById("habitId") as HTMLInputElement;
+newHabitName.addEventListener('keyup', async(e) => {
+    let habitNameErrorField = document.getElementById("habitNameErrorFieldId") as HTMLInputElement;
+    let habitname = e.target as HTMLInputElement
+    if(await searchForHabit(habitname.value) === null) {
+        habitNameErrorField.setAttribute("hidden", "hidden");
+        addHabitButton.disabled = false;
+    }
+    else {
+        habitNameErrorField.innerText = 'Habit Already Exists';
+        habitNameErrorField.removeAttribute("hidden");
+        addHabitButton.disabled = true;
+    }
+})

@@ -43,6 +43,15 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapGet("/api/habits/find/{habitName}", async (string habitName, ApplicationDbContext db) =>
+{
+    if (string.IsNullOrEmpty(habitName))
+    {
+        return Results.NotFound();
+    }
+    Habit? habit = await db.Habits.FirstOrDefaultAsync(h => h.Name == habitName);
+    return habit == null ? Results.NotFound() : Results.Ok(habit);
+});
 app.MapPost("/api/habits/create", async (List<Habit> habits, ApplicationDbContext db)=>
 {
     if (habits.Count == 0)
