@@ -1,0 +1,40 @@
+@page
+@model Improved.Pages.AllHabits
+
+@{
+    ViewData["Title"] = "All Habits";
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title></title>
+</head>
+<body>
+<div>
+    <div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Habit</th>
+                <th>Date Created</th>
+            </tr>
+
+            </thead>
+            <tbody>
+            @foreach(var habit in Model.Habits) 
+            {
+                <tr>
+                    <td>@habit.Name</td>
+                    <td>@habit.Date</td>
+                </tr>
+            }
+            
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

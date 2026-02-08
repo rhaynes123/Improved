@@ -1,8 +1,10 @@
 import {Habit} from "./habit";
 import HabitService from "./habitService.js"
+
+
 const habitList = document.getElementById("habitList") as HTMLDivElement;
 const formData = document.getElementById("formData") as HTMLDivElement;
-
+const newHabitName = document.getElementById("habitId") as HTMLInputElement;
 const addHabitButton = document.getElementById("addHabitBtnId") as HTMLButtonElement;
 const saveHabitButton = document.getElementById("submitAllBtn") as HTMLButtonElement;
 
@@ -11,7 +13,7 @@ const addHabit = () => {
     newHabit.classList.add("habit-row");
     habitList.appendChild(newHabit);
 }
-addHabitButton.addEventListener("click", addHabit);
+
 // Show the alert
 const showAlert = (message: string, type: "success" | "danger") => {
 
@@ -28,9 +30,11 @@ const saveHabits = () => {
     habitRows.forEach((habitRow) => {
         let habitName = (habitRow.querySelector("[name='habitName']") as HTMLInputElement).value;
         let date = (habitRow.querySelector("[name='startDate']") as HTMLInputElement).value;
+        let notes = (habitRow.querySelector("[name='habitNotes']") as HTMLInputElement).value;
         let newHabit : Habit = {
             name : habitName,
             date : date,
+            notes : notes,
         };
         newHabits.push(newHabit);
     })
@@ -47,16 +51,18 @@ const saveHabits = () => {
     })
     
 }
-saveHabitButton.addEventListener("click", saveHabits);
 
-async function searchForHabit( name : String): Promise<Habit[]>  | null {
-   return await HabitService.findHabit(name)
+async function habitExists( name : String): Promise<boolean> {
+   return await HabitService.findHabit(name) !== null
 }
-const newHabitName = document.getElementById("habitId") as HTMLInputElement;
-newHabitName.addEventListener('keyup', async(e) => {
+
+saveHabitButton.addEventListener("click", saveHabits);
+addHabitButton.addEventListener("click", addHabit);
+
+async function lookUpHabit(e: KeyboardEvent): Promise<void> {
     let habitNameErrorField = document.getElementById("habitNameErrorFieldId") as HTMLInputElement;
     let habitname = e.target as HTMLInputElement
-    if(await searchForHabit(habitname.value) === null) {
+    if(!await habitExists(habitname.value)) {
         habitNameErrorField.setAttribute("hidden", "hidden");
         addHabitButton.disabled = false;
     }
@@ -65,4 +71,7 @@ newHabitName.addEventListener('keyup', async(e) => {
         habitNameErrorField.removeAttribute("hidden");
         addHabitButton.disabled = true;
     }
-})
+}
+
+const debouncedHabits = _.debounce(lookUpHabit,300);
+newHabitName.addEventListener('keyup', debouncedHabits);
